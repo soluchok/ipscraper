@@ -25,7 +25,7 @@ type Provider interface {
 
 func New() *Scraper {
 	return &Scraper{
-		providers: []Provider{NewFreeProxyList()},
+		providers: []Provider{NewFreeProxyList(), NewOpenProxyList(), NewGeonodeList()},
 		sem:       semaphore.NewWeighted(maxGoroutines),
 		wg:        &sync.WaitGroup{},
 		cache:     &sync.Map{},
@@ -63,7 +63,6 @@ func (s *Scraper) Get() ([]string, error) {
 			val, err := s.checkIPWithCache(ip)
 			if err != nil {
 				log.Printf("check IP with cache: %v\n", err)
-
 				return
 			}
 
