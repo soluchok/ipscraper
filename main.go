@@ -25,10 +25,12 @@ type Provider interface {
 
 func New() *Scraper {
 	return &Scraper{
-		providers: []Provider{NewFreeProxyList()},
-		sem:       semaphore.NewWeighted(maxGoroutines),
-		wg:        &sync.WaitGroup{},
-		cache:     &sync.Map{},
+		providers: []Provider{NewFreeProxyList(), NewOpenProxyList(), NewGeonodeList(),
+			NewPlainProxyList("https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt"),
+			NewPlainProxyList("https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=5000&country=all&ssl=all&anonymity=all&simplified=true")},
+		sem:   semaphore.NewWeighted(maxGoroutines),
+		wg:    &sync.WaitGroup{},
+		cache: &sync.Map{},
 	}
 }
 
@@ -63,7 +65,6 @@ func (s *Scraper) Get() ([]string, error) {
 			val, err := s.checkIPWithCache(ip)
 			if err != nil {
 				log.Printf("check IP with cache: %v\n", err)
-
 				return
 			}
 
